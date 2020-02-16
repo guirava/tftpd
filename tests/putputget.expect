@@ -1,0 +1,26 @@
+#!/usr/bin/expect -f
+set HOST [lindex $argv 0]
+set LOCALFILE [lindex $argv 1]
+set LOCALFILESIZE [lindex $argv 2]
+set timeout 5
+spawn tftp $HOST
+expect "tftp>"
+send -- "put $LOCALFILE\r"
+expect "Mode not supported"
+send -- "mode octet\r"
+expect "tftp>"
+send -- "put $LOCALFILE\r"
+if { $LOCALFILESIZE > 0 } {
+    expect "ent $LOCALFILESIZE bytes"
+}
+expect "tftp>"
+send -- "put $LOCALFILE\r"
+expect "$LOCALFILE already exists"
+send -- "get $LOCALFILE $LOCALFILE.copy\r"
+if { $LOCALFILESIZE > 0 } {
+    expect "eceived $LOCALFILESIZE bytes"
+}
+send -- "q\r"
+expect eof
+exit
+
